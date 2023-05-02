@@ -7,7 +7,7 @@ function colorize(color, output) {
 const client = new tmi.Client({
   options: { debug: true },
   identity: {
-    username: process.env.C,
+    username: process.env.TWITCH_USERNAME,
     password: process.env.TWITCH_TOKEN,
   },
   channels: ['kykla66'],

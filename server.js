@@ -38,9 +38,10 @@ class MyBot {
     client.connect().catch(console.error);
 
     client.on('message', (...args) => {
-      if (args.at(-1)) return;
-      this.terminalLog(...args);
-      this.fileLog(...args);
+      const [channel, userstate, message, self] = args;
+      if (self) return;
+      this.logger(...args);
+      this.watcher(...args);
     });
   }
 
@@ -56,7 +57,7 @@ class MyBot {
     return new Date().toLocaleTimeString('en-US', { hour12: false });
   }
 
-  fileLog(channel, tags, message) {
+  watcher(channel, tags, message) {
     if (this.LOG_TARGETS.includes(tags.username)) {
       fs.appendFile(
         this.logFilePathHandler(channel),
@@ -65,7 +66,7 @@ class MyBot {
         } ${message}\n`,
         (err) => {
           if (err) {
-            console.log(err);
+            process.stdout.write(this.colorize(this.TERM_COLORS.lightRed, err));
             process.exit(0);
           }
         }
@@ -73,7 +74,7 @@ class MyBot {
     }
   }
 
-  terminalLog(channel, tags, message) {
+  logger(channel, tags, message) {
     const formatted = `<${this.currentTime()}>[channel:${channel}] ${this.colorize(
       this.TERM_COLORS.red,
       tags.username
@@ -86,20 +87,20 @@ class MyBot {
 const bot = new MyBot();
 
 // client.on('redeem', (channel, username, rewardType, tags, message) => {
-//   console.log(
+//  process.stdout.write(
 //     `<${currentTime()}>Triggered redeemed: ${username} -> ${rewardType}`
 //   );
 // });
 // client.on('join', function (channel, username) {
-//   console.log(`<${currentTime()}>Triggered join: <%s>`, username);
+//  process.stdout.write(`<${currentTime()}>Triggered join: <%s>`, username);
 // });
 
 // client.on('notice', (channel, msgid, message) => {
-//   console.log(`-------------------------`);
-//   console.log(
+//  process.stdout.write(`-------------------------`);
+//  process.stdout.write(
 //     `<${currentTime()}>Triggered notice: msgid -> %s, message -> %s `,
 //     msgid,
 //     message
 //   );
-//   console.log(`-------------------------`);
+//  process.stdout.write(`-------------------------`);
 // });

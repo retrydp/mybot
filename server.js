@@ -22,8 +22,25 @@ class MyBot {
     lightMagenta: 95,
     lightCyan: 96,
   };
-  LOG_TARGETS = ['byme69', 'blackgeneralgenagenerator', 'latatatum'];
-  CHANNELS = ['k0smos95'];
+  LOG_TARGETS = [
+    'byme69',
+    'blackgeneralgenagenerator',
+    'latatatum',
+    'molomus',
+    'mr_bonger',
+    'alpaca_m',
+    'olkikz',
+    'chakralounge',
+    'mrtwentytwo',
+    'k0smos95',
+    'kykla66',
+    'logika17',
+    'izanami_dav',
+    'goblak333',
+    'sportmafia',
+    'dysheboy',
+  ];
+  CHANNELS = ['k0smos95', 'kykla66', 'chakralounge'];
 
   constructor() {
     const client = new tmi.Client({
@@ -35,7 +52,20 @@ class MyBot {
       channels: this.CHANNELS,
     });
 
-    client.connect().catch(console.error);
+    client
+      .connect()
+      .then(() =>
+        process.stdout.write(
+          this.colorize(
+            this.TERM_COLORS.green,
+            `Bot started on ${this.currentTime()}\n`
+          )
+        )
+      )
+      .catch((err) => {
+        process.stdout.write(this.colorize(this.TERM_COLORS.lightRed, err));
+        process.exit(0);
+      });
 
     client.on('message', (...args) => {
       const [channel, userstate, message, self] = args;
@@ -46,7 +76,7 @@ class MyBot {
   }
 
   logFilePathHandler(channelName) {
-    return `./logs/${channelName}.txt`;
+    return `./logs/${channelName.substring(1)}.txt`;
   }
 
   colorize(color, output) {
@@ -63,13 +93,19 @@ class MyBot {
         this.logFilePathHandler(channel),
         `<${this.currentTime()}>[channel:${channel}] ${
           tags.username
-        } ${message}\n`,
+        }: ${message}\n`,
         (err) => {
           if (err) {
             process.stdout.write(this.colorize(this.TERM_COLORS.lightRed, err));
             process.exit(0);
           }
         }
+      );
+      process.stdout.write(
+        this.colorize(
+          this.TERM_COLORS.blue,
+          `Captured ${tags.username}'s message [channel:${channel}].\n`
+        )
       );
     }
   }

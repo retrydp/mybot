@@ -1,3 +1,5 @@
 **\node_modules
 .env
 **\logs
+# Local Netlify folder
+.netlify

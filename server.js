@@ -39,6 +39,7 @@ class MyBot {
     'goblak333',
     'sportmafia',
     'dysheboy',
+    'yachmen2424',
   ];
   CHANNELS = ['k0smos95', 'kykla66', 'chakralounge'];
 
@@ -70,8 +71,8 @@ class MyBot {
     client.on('message', (...args) => {
       const [channel, userstate, message, self] = args;
       if (self) return;
-      this.logger(...args);
       this.watcher(...args);
+      this.logger(...args);
     });
   }
 
@@ -111,10 +112,10 @@ class MyBot {
   }
 
   logger(channel, tags, message) {
-    const formatted = `<${this.currentTime()}>[channel:${channel}] ${this.colorize(
+    const formatted = `<${this.currentTime()}>[${channel}] ${this.colorize(
       this.TERM_COLORS.red,
-      tags.username
-    )} ${tags['message-type']}: ${message}\n`;
+      tags['display-name']
+    )}: ${message}\n`;
 
     process.stdout.write(formatted);
   }

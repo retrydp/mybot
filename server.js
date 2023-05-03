@@ -40,17 +40,7 @@ const client = new tmi.Client({
   channels: ['cohhcarnage'],
 });
 
-client.connect().catch(console.error);
-
-client.on('message', (channel, tags, message, self) => {
-  if (self) return;
-
-  const formatted = `<${currentTime()}>[channel:${channel}] ${colorize(
-    TERM_COLORS.red,
-    tags.username
-  )} ${tags['message-type']}: ${message}\n`;
-
-  process.stdout.write(formatted);
+const fileLog = (channel, tags, message) => {
   if (LOG_TARGETS.includes(tags.username)) {
     fs.appendFile(
       LOG_FILE,
@@ -63,6 +53,23 @@ client.on('message', (channel, tags, message, self) => {
       }
     );
   }
+};
+
+const terminalLog = (channel, tags, message) => {
+  const formatted = `<${currentTime()}>[channel:${channel}] ${colorize(
+    TERM_COLORS.red,
+    tags.username
+  )} ${tags['message-type']}: ${message}\n`;
+
+  process.stdout.write(formatted);
+};
+
+client.connect().catch(console.error);
+
+client.on('message', (...args) => {
+  if (args.at(-1)) return;
+  terminalLog(...args);
+  fileLog(...args);
 });
 client.on('redeem', (channel, username, rewardType, tags, message) => {
   console.log(

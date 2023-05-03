@@ -22,6 +22,7 @@ const TERM_COLORS = {
   white: 97,
 };
 const LOG_FILE = './logs/log.txt';
+const LOG_TARGETS = ['cohhilitionbot', 'suzunahara'];
 
 function colorize(color, output) {
   return ['\033[', color, 'm', output, '\033[0m'].join('');
@@ -50,7 +51,7 @@ client.on('message', (channel, tags, message, self) => {
   )} ${tags['message-type']}: ${message}\n`;
 
   process.stdout.write(formatted);
-  if (tags.username === 'cohhilitionbot') {
+  if (LOG_TARGETS.includes(tags.username)) {
     fs.appendFile(
       LOG_FILE,
       `<${currentTime()}>[channel:${channel}] ${tags.username} ${message}\n`,

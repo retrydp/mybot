@@ -66,9 +66,9 @@ class BattlegroundStatsParser {
     process.stdout.write(text + '\n');
   }
 
-  async measureExecutionTime(text, cb) {
+  measureExecutionTime(text, cb) {
     const startTime = this.getCurrentTime();
-    return await cb.then((data) => {
+    return cb.then((data) => {
       this.logToConsole(`${text} ${this.getCurrentTime() - startTime}ms`);
       return data;
     });

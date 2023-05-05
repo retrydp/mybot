@@ -24,8 +24,6 @@ class MyBot {
     lightMagenta: 95,
     lightCyan: 96,
   };
-  watchedUsers = settings.watchedUsers;
-  targetChannels = settings.targetChannels;
 
   constructor() {
     const client = new tmi.Client({
@@ -34,7 +32,7 @@ class MyBot {
         username: process.env.TWITCH_USERNAME,
         password: process.env.TWITCH_TOKEN,
       },
-      channels: this.targetChannels,
+      channels: settings.targetChannels,
     });
 
     client
@@ -82,34 +80,36 @@ class MyBot {
           client.say('retrydp', 'Потрібно вказати нікнейм!');
           return;
         }
-
-        fs.readFile('./data/db.json')
-          .then((data) => {
-            const db = JSON.parse(data);
-            const result = db.find(
-              (el) => el.accountid.toLowerCase() === nickname.toLowerCase()
-            );
-
-            if (!result) {
-              client.say(
-                'retrydp',
-                `@${userstate['display-name']}: Такий користувач не знайдений в базі!`
-              );
-              return;
-            }
-            client.say('retrydp', JSON.stringify(result));
-          })
-          .catch((err) => {
-            client.say(
-              'retrydp',
-              'Помилка при завантаженні таблиці! Мабуть ви не обновили стату. (!refresh)'
-            );
-          });
+        this.searchUserInDatabaseAndSendResult(client, nickname);
       }
-
       this.logChat(...args);
     });
   }
+
+  searchUserInDatabaseAndSendResult = (ctx, user) => {
+    fs.readFile('./data/db.json')
+      .then((data) => {
+        const db = JSON.parse(data);
+        const result = db.find(
+          (el) => el.accountid.toLowerCase() === user.toLowerCase()
+        );
+
+        if (!result) {
+          ctx.say(
+            'retrydp',
+            `@${userstate['display-name']}: Такий користувач не знайдений в базі!`
+          );
+          return;
+        }
+        ctx.say('retrydp', JSON.stringify(result));
+      })
+      .catch((err) => {
+        ctx.say(
+          'retrydp',
+          'Помилка при завантаженні таблиці! Мабуть ви не обновили стату. (!refresh)'
+        );
+      });
+  };
 
   logFilePathHandler(channelName) {
     return `./logs/${channelName.substring(1)}.txt`;
@@ -124,7 +124,7 @@ class MyBot {
   }
 
   // monitorChat(channel, tags, message) {
-  //   if (this.watchedUsers.includes(tags.username)) {
+  //   if (settings.watchedUsers.includes(tags.username)) {
   //     fs.appendFile(
   //       this.logFilePathHandler(channel),
   //       `<${this.currentTime()}>[channel:${channel}] ${
@@ -171,4 +171,5 @@ const bot = new MyBot();
   - parsit' stats ne tolko dl9 eu
   - method dl9 stdout.write + \n v samom bote, realizatsiya est' uje v battlegroundStatsParser
   - ne vse otvety bota letyat v pm!
+  - initialize parser pri starte bota
 */

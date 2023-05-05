@@ -170,4 +170,5 @@ const bot = new MyBot();
   - vynesti colorize v utils
   - parsit' stats ne tolko dl9 eu
   - method dl9 stdout.write + \n v samom bote, realizatsiya est' uje v battlegroundStatsParser
+  - ne vse otvety bota letyat v pm!
 */

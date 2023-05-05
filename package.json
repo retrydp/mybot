@@ -18,8 +18,6 @@
     "tmi.js": "^1.8.5"
   },
   "pkg": {
-    "scripts": "build/**/*.js",
-    "assets": "views/**/*",
     "targets": [
       "node14-win-x64"
     ],

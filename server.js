@@ -40,6 +40,7 @@ class MyBot {
     'sportmafia',
     'dysheboy',
     'yachmen2424',
+    'eugene_locky',
   ];
   CHANNELS = ['k0smos95', 'kykla66', 'chakralounge'];
 

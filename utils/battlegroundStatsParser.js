@@ -75,5 +75,4 @@ class BattlegroundStatsParser {
   }
 }
 
-const tf = new BattlegroundStatsParser();
-tf.init();
+module.exports = BattlegroundStatsParser;

@@ -3,3 +3,4 @@
 **\logs
 # Local Netlify folder
 .netlify
+**\dist

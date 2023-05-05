@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "bot.js",
+  "bin": "./bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node bot.js"
@@ -12,6 +13,16 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.3",
+    "g": "^2.0.1",
+    "pkg": "^5.8.1",
     "tmi.js": "^1.8.5"
+  },
+  "pkg": {
+    "scripts": "build/**/*.js",
+    "assets": "views/**/*",
+    "targets": [
+      "node14-win-x64"
+    ],
+    "outputPath": "dist"
   }
 }

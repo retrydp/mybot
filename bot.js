@@ -1,6 +1,8 @@
 const tmi = require('tmi.js');
 const env = require('dotenv');
-const fs = require('fs');
+const settings = require('./settings.json');
+const fs = require('fs/promises');
+const Refresher = require('./utils/battlegroundStatsParser');
 env.config();
 
 class MyBot {
@@ -22,27 +24,8 @@ class MyBot {
     lightMagenta: 95,
     lightCyan: 96,
   };
-  watchedUsers = [
-    'byme69',
-    'blackgeneralgenagenerator',
-    'latatatum',
-    'molomus',
-    'mr_bonger',
-    'alpaca_m',
-    'olkikz',
-    'chakralounge',
-    'mrtwentytwo',
-    'k0smos95',
-    'kykla66',
-    'logika17',
-    'izanami_dav',
-    'goblak333',
-    'sportmafia',
-    'dysheboy',
-    'yachmen2424',
-    'eugene_locky',
-  ];
-  targetChannels = ['k0smos95', 'kykla66', 'chakralounge'];
+  watchedUsers = settings.watchedUsers;
+  targetChannels = settings.targetChannels;
 
   constructor() {
     const client = new tmi.Client({
@@ -72,7 +55,58 @@ class MyBot {
     client.on('message', (...args) => {
       const [channel, userstate, message, self] = args;
       if (self) return;
-      this.monitorChat(...args);
+      if (
+        message === '!refresh' &&
+        settings.permittedUsers.includes(userstate.username)
+      ) {
+        const refresher = new Refresher();
+        refresher
+          .init()
+          .then(() =>
+            client.say(
+              'retrydp',
+              `@${userstate['display-name']}: Таблиця оновлена!`
+            )
+          )
+          .catch(() => {
+            client.say(
+              'retrydp',
+              `@${userstate['display-name']}: Помилка при оновленні таблиці!`
+            );
+          });
+      }
+      if (message?.startsWith('!bgrank')) {
+        const nickname = message.split(' ')[1];
+
+        if (!nickname) {
+          client.say('retrydp', 'Потрібно вказати нікнейм!');
+          return;
+        }
+
+        fs.readFile('./data/db.json')
+          .then((data) => {
+            const db = JSON.parse(data);
+            const result = db.find(
+              (el) => el.accountid.toLowerCase() === nickname.toLowerCase()
+            );
+
+            if (!result) {
+              client.say(
+                'retrydp',
+                `@${userstate['display-name']}: Такий користувач не знайдений в базі!`
+              );
+              return;
+            }
+            client.say('retrydp', JSON.stringify(result));
+          })
+          .catch((err) => {
+            client.say(
+              'retrydp',
+              'Помилка при завантаженні таблиці! Мабуть ви не обновили стату. (!refresh)'
+            );
+          });
+      }
+
       this.logChat(...args);
     });
   }
@@ -89,30 +123,30 @@ class MyBot {
     return new Date().toLocaleTimeString('en-US', { hour12: false });
   }
 
-  monitorChat(channel, tags, message) {
-    if (this.watchedUsers.includes(tags.username)) {
-      fs.appendFile(
-        this.logFilePathHandler(channel),
-        `<${this.currentTime()}>[channel:${channel}] ${
-          tags.username
-        }: ${message}\n`,
-        (err) => {
-          if (err) {
-            process.stdout.write(
-              this.colorize(this.terminalColors.lightRed, err)
-            );
-            process.exit(0);
-          }
-        }
-      );
-      process.stdout.write(
-        this.colorize(
-          this.terminalColors.blue,
-          `Captured ${tags.username}'s message [channel:${channel}].\n`
-        )
-      );
-    }
-  }
+  // monitorChat(channel, tags, message) {
+  //   if (this.watchedUsers.includes(tags.username)) {
+  //     fs.appendFile(
+  //       this.logFilePathHandler(channel),
+  //       `<${this.currentTime()}>[channel:${channel}] ${
+  //         tags.username
+  //       }: ${message}\n`,
+  //       (err) => {
+  //         if (err) {
+  //           process.stdout.write(
+  //             this.colorize(this.terminalColors.lightRed, err)
+  //           );
+  //           process.exit(0);
+  //         }
+  //       }
+  //     );
+  //     process.stdout.write(
+  //       this.colorize(
+  //         this.terminalColors.blue,
+  //         `Captured ${tags.username}'s message [channel:${channel}].\n`
+  //       )
+  //     );
+  //   }
+  // }
 
   logChat(channel, tags, message) {
     const formatted = `<${this.currentTime()}>[${channel}] ${this.colorize(
@@ -125,22 +159,3 @@ class MyBot {
 }
 
 const bot = new MyBot();
-
-// client.on('redeem', (channel, username, rewardType, tags, message) => {
-//  process.stdout.write(
-//     `<${currentTime()}>Triggered redeemed: ${username} -> ${rewardType}`
-//   );
-// });
-// client.on('join', function (channel, username) {
-//  process.stdout.write(`<${currentTime()}>Triggered join: <%s>`, username);
-// });
-
-// client.on('notice', (channel, msgid, message) => {
-//  process.stdout.write(`-------------------------`);
-//  process.stdout.write(
-//     `<${currentTime()}>Triggered notice: msgid -> %s, message -> %s `,
-//     msgid,
-//     message
-//   );
-//  process.stdout.write(`-------------------------`);
-// });

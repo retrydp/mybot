@@ -75,7 +75,7 @@ class MyBot {
             );
           });
       }
-      if (message?.startsWith('!bgrank')) {
+      if (message.startsWith('!bgrank')) {
         const nickname = message.split(' ')[1];
 
         if (!nickname) {
@@ -159,3 +159,15 @@ class MyBot {
 }
 
 const bot = new MyBot();
+
+/*TODO:
+  - dopilit' settings.json, +flagi na (ne)otobrajeniya chatfeeda v consol'ke
+  - mb napistat' otdel`nyy configurator dl9 nego
+  - mb zapihnut' v nego token dl9 hotswap, esli sletit sessiya
+  - zapilit' norm logger, otlavlivat' catches 
+  - zapihnut' ves' text v constanty/obj dl9 multilanga
+  - zapilit' multilang dl9 kajdogo usera
+  - vynesti colorize v utils
+  - parsit' stats ne tolko dl9 eu
+  - method dl9 stdout.write + \n v samom bote, realizatsiya est' uje v battlegroundStatsParser
+*/

@@ -4,7 +4,7 @@ const fs = require('fs');
 env.config();
 
 class MyBot {
-  TERM_COLORS = {
+  terminalColors = {
     white: 97,
     black: 30,
     red: 31,
@@ -22,7 +22,7 @@ class MyBot {
     lightMagenta: 95,
     lightCyan: 96,
   };
-  LOG_TARGETS = [
+  watchedUsers = [
     'byme69',
     'blackgeneralgenagenerator',
     'latatatum',
@@ -42,7 +42,7 @@ class MyBot {
     'yachmen2424',
     'eugene_locky',
   ];
-  CHANNELS = ['k0smos95', 'kykla66', 'chakralounge'];
+  targetChannels = ['k0smos95', 'kykla66', 'chakralounge'];
 
   constructor() {
     const client = new tmi.Client({
@@ -51,7 +51,7 @@ class MyBot {
         username: process.env.TWITCH_USERNAME,
         password: process.env.TWITCH_TOKEN,
       },
-      channels: this.CHANNELS,
+      channels: this.targetChannels,
     });
 
     client
@@ -59,21 +59,21 @@ class MyBot {
       .then(() =>
         process.stdout.write(
           this.colorize(
-            this.TERM_COLORS.green,
+            this.terminalColors.green,
             `Bot started on ${this.currentTime()}\n`
           )
         )
       )
       .catch((err) => {
-        process.stdout.write(this.colorize(this.TERM_COLORS.lightRed, err));
+        process.stdout.write(this.colorize(this.terminalColors.lightRed, err));
         process.exit(0);
       });
 
     client.on('message', (...args) => {
       const [channel, userstate, message, self] = args;
       if (self) return;
-      this.watcher(...args);
-      this.logger(...args);
+      this.monitorChat(...args);
+      this.logChat(...args);
     });
   }
 
@@ -82,15 +82,15 @@ class MyBot {
   }
 
   colorize(color, output) {
-    return ['\x1b[', color, 'm', output, '\x1b[0m'].join('');
+    return `\x1b[${color}m${output}\x1b[0m`;
   }
 
   currentTime() {
     return new Date().toLocaleTimeString('en-US', { hour12: false });
   }
 
-  watcher(channel, tags, message) {
-    if (this.LOG_TARGETS.includes(tags.username)) {
+  monitorChat(channel, tags, message) {
+    if (this.watchedUsers.includes(tags.username)) {
       fs.appendFile(
         this.logFilePathHandler(channel),
         `<${this.currentTime()}>[channel:${channel}] ${
@@ -98,23 +98,25 @@ class MyBot {
         }: ${message}\n`,
         (err) => {
           if (err) {
-            process.stdout.write(this.colorize(this.TERM_COLORS.lightRed, err));
+            process.stdout.write(
+              this.colorize(this.terminalColors.lightRed, err)
+            );
             process.exit(0);
           }
         }
       );
       process.stdout.write(
         this.colorize(
-          this.TERM_COLORS.blue,
+          this.terminalColors.blue,
           `Captured ${tags.username}'s message [channel:${channel}].\n`
         )
       );
     }
   }
 
-  logger(channel, tags, message) {
+  logChat(channel, tags, message) {
     const formatted = `<${this.currentTime()}>[${channel}] ${this.colorize(
-      this.TERM_COLORS.red,
+      this.terminalColors.red,
       tags['display-name']
     )}: ${message}\n`;
 

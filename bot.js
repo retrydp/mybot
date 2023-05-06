@@ -1,5 +1,4 @@
-const tmi = require('tmi.js');
-const env = require('dotenv');
+const tmi = require('tmi.js');const env = require('dotenv');
 const settings = require('./settings.json');
 const fs = require('fs/promises');
 const Refresher = require('./utils/battlegroundStatsParser');
@@ -11,7 +10,7 @@ class MyBot {
   defaultChannel = settings.targetChannels[0];
   tf = new TerminalFormatter();
 
-  constructor() {
+  constructor(username, password) {
     const _channel = `#${this.defaultChannel}`;
     const toPrivate = this.pmTag;
     const { colorize, logToConsole } = this.tf;
@@ -19,12 +18,11 @@ class MyBot {
     const client = new tmi.Client({
       options: { debug: false },
       identity: {
-        username: settings.twitchUsername || process.env.TWITCH_USERNAME,
-        password: settings.twitchToken || process.env.TWITCH_TOKEN,
+        username,
+        password,
       },
       channels: settings.targetChannels,
     });
-
     client
       .connect()
       .then(() =>
@@ -147,4 +145,21 @@ class MyBot {
   }
 }
 
-const bot = new MyBot();
+async function readSettings() {
+  const settings = await fs.readFile('./settings.json');
+  if (!settings) {
+    throw new Error('Unable to read/parse settings.json');
+  }
+  const opts = JSON.parse(settings.toString());
+  return opts;
+}
+readSettings()
+  .then((data) => {
+    const login = data.twitchUsername;
+    const token = data.twitchToken;
+    new MyBot(login, token);
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit(1);
+  });

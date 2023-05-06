@@ -166,3 +166,9 @@ readSettings()
     logToConsole(colorize(`red`, err));
     process.exit(1);
   });
+
+/* TODO:
+    - readSettings into particular class
+    - provide settings into main module like context
+    - add "connectionsToApiNumber" in settings
+  */

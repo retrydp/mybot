@@ -1,5 +1,4 @@
 # Mybot
-
 This is twitchbot for display statistic from Hearthstone Battlegrounds.
 
 ## Available commands:
@@ -14,8 +13,8 @@ This is twitchbot for display statistic from Hearthstone Battlegrounds.
   First channel in list will be default channel for bot. If you want to link bot for only your channel set `["your_channel_name"]`;
 - **"permittedUsers"** - array of users, whos allowed to use **!refresh** command, example:
   `["name1", "name2", "name3"]` ;
-- **"twitchUsername"** - string value, name of twitch account (you bot/or your own); (weirdsharpbot by default)
-- **"twitchToken"** - string value, access token to twitch. (uses my own token if not set), you can obtain this token by visiting https://twitchtokengenerator.com and authorize.
+- **"twitchUsername"** - string value, name of twitch account (you bot/or your own);
+- **"twitchToken"** - string value, access token to twitch, you can obtain this token by visiting https://twitchtokengenerator.com and authorize.
 
 ## Used stuff
 

@@ -12,7 +12,7 @@ class MyBot {
   tf = new TerminalFormatter();
 
   constructor() {
-    const _channel = this.defaultChannel;
+    const _channel = `#${this.defaultChannel}`;
     const toPrivate = this.pmTag;
     const { colorize, logToConsole } = this.tf;
     const isChannelEqual = this.isChannelEqual;
@@ -49,12 +49,12 @@ class MyBot {
         refresher
           .init()
           .then(() =>
-            client.say(_channel, toPrivate(requestingUser, `Таблиця оновлена!`))
+            client.say(channel, toPrivate(requestingUser, `Таблиця оновлена!`))
           )
           .catch((err) => {
             logToConsole(colorize('red', err));
             client.say(
-              _channel,
+              channel,
               toPrivate(requestingUser, `Помилка при оновленні таблиці!`)
             );
           });
@@ -64,7 +64,7 @@ class MyBot {
 
         if (!nickname) {
           client.say(
-            _channel,
+            channel,
             toPrivate(requestingUser, 'Потрібно вказати нікнейм!')
           );
           return;
@@ -76,13 +76,15 @@ class MyBot {
         );
       }
       if (message === '!help' && isChannelEqual(channel, _channel)) {
-        client.say(
-          _channel,
-          toPrivate(
-            requestingUser,
-            `!bgrank nickname - показує інфу про місце гравця`
+        client
+          .say(
+            channel,
+            toPrivate(
+              requestingUser,
+              `!bgrank nickname - показує інфу про місце гравця`
+            )
           )
-        );
+          .catch(console.log);
       }
       this.logChat(...args);
     });
@@ -126,8 +128,7 @@ class MyBot {
   }
 
   isChannelEqual(channelFromListener, defaultChannel) {
-    const sharped = `#${defaultChannel}`;
-    return sharped === channelFromListener;
+    return defaultChannel === channelFromListener;
   }
 
   pmTag(tag, text) {

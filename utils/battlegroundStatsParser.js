@@ -1,21 +1,27 @@
 const https = require('https');
 const { Agent } = require('https');
 const LW = require('../controllers/logWriter.js');
+const TerminalFormatter = require('./terminalFormatter');
 
 class BattlegroundStatsParser {
   PAGES = 10000 / 25; // 25 pages per chunk
   BLIZZ_API_URL = `https://hearthstone.blizzard.com/en-us/api/community/leaderboardsData?region=EU&leaderboardId=battlegrounds&page=`;
-
+  tf = new TerminalFormatter();
   constructor() {
-    this.logToConsole(`Fetcher executed`);
+    const { logToConsole, colorize } = this.tf;
+    logToConsole(colorize(`blue`, `Fetcher executed`));
   }
 
   async init() {
     const lw = new LW();
+    const { colorize, logToConsole } = this.tf;
     const log = this.measureExecutionTime.bind(this);
-    this.logToConsole(`Initializing...`);
-    const data = await log('Parsed in', this.fetchLeaderboardData());
-    await log(`Saved to file in`, lw.logToFile(data));
+    logToConsole(colorize(`blue`, `Initializing...`));
+    const data = await log(
+      colorize(`blue`, `Parsed in`),
+      this.fetchLeaderboardData()
+    );
+    await log(colorize(`blue`, `Saved to file in`), lw.logToFile(data));
   }
 
   createBlizzardAPIUrl(page) {
@@ -55,21 +61,19 @@ class BattlegroundStatsParser {
         const rows = result.value?.leaderboard?.rows || [];
         cached.push(...rows);
       } else {
-        console.error(result.reason); // Log any errors
+        const { logToConsole, colorize } = this.tf;
+        logToConsole(colorize(`red`, result.reason)); // Log any errors
       }
     });
 
     return cached;
   }
 
-  logToConsole(text) {
-    process.stdout.write(text + '\n');
-  }
-
   measureExecutionTime(text, cb) {
     const startTime = this.getCurrentTime();
+    const { logToConsole } = this.tf;
     return cb.then((data) => {
-      this.logToConsole(`${text} ${this.getCurrentTime() - startTime}ms`);
+      logToConsole(`${text} ${this.getCurrentTime() - startTime}ms`);
       return data;
     });
   }

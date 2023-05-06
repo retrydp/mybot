@@ -3,29 +3,18 @@ const env = require('dotenv');
 const settings = require('./settings.json');
 const fs = require('fs/promises');
 const Refresher = require('./utils/battlegroundStatsParser');
+const TerminalFormatter = require('./utils/terminalFormatter');
+
 env.config();
 
 class MyBot {
-  terminalColors = {
-    white: 97,
-    black: 30,
-    red: 31,
-    green: 32,
-    yellow: 33,
-    blue: 34,
-    magenta: 35,
-    cyan: 36,
-    gray: 90,
-    lightRed: 91,
-    lightGray: 37,
-    lightGreen: 92,
-    lightYellow: 93,
-    lightBlue: 94,
-    lightMagenta: 95,
-    lightCyan: 96,
-  };
+  defaultChannel = settings.targetChannels[0];
+  tf = new TerminalFormatter();
 
   constructor() {
+    const _channel = this.defaultChannel;
+    const toPrivate = this.pmTag;
+    const { colorize, logToConsole } = this.tf;
     const client = new tmi.Client({
       options: { debug: false },
       identity: {
@@ -38,38 +27,33 @@ class MyBot {
     client
       .connect()
       .then(() =>
-        process.stdout.write(
-          this.colorize(
-            this.terminalColors.green,
-            `Bot started on ${this.currentTime()}\n`
-          )
-        )
+        logToConsole(colorize('green', `Bot started on ${this.currentTime()}`))
       )
       .catch((err) => {
-        process.stdout.write(this.colorize(this.terminalColors.lightRed, err));
+        logToConsole(colorize('red', err));
         process.exit(0);
       });
 
     client.on('message', (...args) => {
       const [channel, userstate, message, self] = args;
+      const requestingUser = userstate['display-name'];
       if (self) return;
       if (
         message === '!refresh' &&
-        settings.permittedUsers.includes(userstate.username)
+        settings.permittedUsers.includes(userstate.username) &&
+        userstate.mod
       ) {
         const refresher = new Refresher();
         refresher
           .init()
           .then(() =>
-            client.say(
-              'retrydp',
-              `@${userstate['display-name']}: Таблиця оновлена!`
-            )
+            client.say(_channel, toPrivate(requestingUser, `Таблиця оновлена!`))
           )
-          .catch(() => {
+          .catch((err) => {
+            logToConsole(colorize('red', err));
             client.say(
-              'retrydp',
-              `@${userstate['display-name']}: Помилка при оновленні таблиці!`
+              _channel,
+              toPrivate(requestingUser, `Помилка при оновленні таблиці!`)
             );
           });
       }
@@ -77,18 +61,36 @@ class MyBot {
         const nickname = message.split(' ')[1];
 
         if (!nickname) {
-          client.say('retrydp', 'Потрібно вказати нікнейм!');
+          client.say(
+            _channel,
+            toPrivate(requestingUser, 'Потрібно вказати нікнейм!')
+          );
           return;
         }
-        this.searchUserInDatabaseAndSendResult(client, nickname);
+        this.searchUserInDatabaseAndSendResult(
+          client,
+          nickname,
+          requestingUser
+        );
+      }
+      if (message === '!help') {
+        client.say(
+          _channel,
+          toPrivate(
+            requestingUser,
+            `!bgrank nickname - показує інфу про місце гравця`
+          )
+        );
       }
       this.logChat(...args);
     });
   }
 
-  searchUserInDatabaseAndSendResult = (ctx, user) => {
+  searchUserInDatabaseAndSendResult = (ctx, user, requestingUser) => {
     fs.readFile('./data/db.json')
       .then((data) => {
+        const toPrivate = this.pmTag;
+        const _channel = this.defaultChannel;
         const db = JSON.parse(data);
         const result = db.find(
           (el) => el.accountid.toLowerCase() === user.toLowerCase()
@@ -96,16 +98,22 @@ class MyBot {
 
         if (!result) {
           ctx.say(
-            'retrydp',
-            `@${userstate['display-name']}: Такий користувач не знайдений в базі!`
+            _channel,
+            toPrivate(requestingUser, `Такий користувач не знайдений в базі`)
           );
           return;
         }
-        ctx.say('retrydp', JSON.stringify(result));
+        const statsMessage = toPrivate(
+          requestingUser,
+          `Гравець ${result.accountid} зараз на ${result.rank} з рейтингом ${result.rating}`
+        );
+        ctx.say(_channel, statsMessage);
       })
       .catch((err) => {
+        const { logToConsole, colorize } = this.tf;
+        logToConsole(colorize('red', err));
         ctx.say(
-          'retrydp',
+          this.defaultChannel,
           'Помилка при завантаженні таблиці! Мабуть ви не обновили стату. (!refresh)'
         );
       });
@@ -115,12 +123,12 @@ class MyBot {
     return `./logs/${channelName.substring(1)}.txt`;
   }
 
-  colorize(color, output) {
-    return `\x1b[${color}m${output}\x1b[0m`;
+  currentTime() {
+    return new Date().toLocaleTimeString('ua-UA', { hour12: false });
   }
 
-  currentTime() {
-    return new Date().toLocaleTimeString('en-US', { hour12: false });
+  pmTag(tag, text) {
+    return `@${tag}: ${text}`;
   }
 
   // monitorChat(channel, tags, message) {
@@ -133,7 +141,7 @@ class MyBot {
   //       (err) => {
   //         if (err) {
   //           process.stdout.write(
-  //             this.colorize(this.terminalColors.lightRed, err)
+  //             this.colorize('lightRed', err)
   //           );
   //           process.exit(0);
   //         }
@@ -141,7 +149,7 @@ class MyBot {
   //     );
   //     process.stdout.write(
   //       this.colorize(
-  //         this.terminalColors.blue,
+  //         'blue',
   //         `Captured ${tags.username}'s message [channel:${channel}].\n`
   //       )
   //     );
@@ -149,27 +157,15 @@ class MyBot {
   // }
 
   logChat(channel, tags, message) {
-    const formatted = `<${this.currentTime()}>[${channel}] ${this.colorize(
-      this.terminalColors.red,
+    const timestamp = this.currentTime();
+    const { logToConsole, colorize } = this.tf;
+    const formatted = `<${timestamp}>[${channel}] ${colorize(
+      'red',
       tags['display-name']
-    )}: ${message}\n`;
+    )}: ${message}`;
 
-    process.stdout.write(formatted);
+    logToConsole(formatted);
   }
 }
 
 const bot = new MyBot();
-
-/*TODO:
-  - dopilit' settings.json, +flagi na (ne)otobrajeniya chatfeeda v consol'ke
-  - mb napistat' otdel`nyy configurator dl9 nego
-  - mb zapihnut' v nego token dl9 hotswap, esli sletit sessiya
-  - zapilit' norm logger, otlavlivat' catches 
-  - zapihnut' ves' text v constanty/obj dl9 multilanga
-  - zapilit' multilang dl9 kajdogo usera
-  - vynesti colorize v utils
-  - parsit' stats ne tolko dl9 eu
-  - method dl9 stdout.write + \n v samom bote, realizatsiya est' uje v battlegroundStatsParser
-  - ne vse otvety bota letyat v pm!
-  - initialize parser pri starte bota
-*/

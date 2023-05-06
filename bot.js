@@ -15,11 +15,12 @@ class MyBot {
     const _channel = this.defaultChannel;
     const toPrivate = this.pmTag;
     const { colorize, logToConsole } = this.tf;
+    const isChannelEqual = this.isChannelEqual;
     const client = new tmi.Client({
       options: { debug: false },
       identity: {
-        username: process.env.TWITCH_USERNAME,
-        password: process.env.TWITCH_TOKEN,
+        username: settings.twitchUsername || process.env.TWITCH_USERNAME,
+        password: settings.twitchToken || process.env.TWITCH_TOKEN,
       },
       channels: settings.targetChannels,
     });
@@ -41,7 +42,8 @@ class MyBot {
       if (
         message === '!refresh' &&
         settings.permittedUsers.includes(userstate.username) &&
-        userstate.mod
+        userstate.mod &&
+        isChannelEqual(channel, _channel)
       ) {
         const refresher = new Refresher();
         refresher
@@ -57,7 +59,7 @@ class MyBot {
             );
           });
       }
-      if (message.startsWith('!bgrank')) {
+      if (message.startsWith('!bgrank') && isChannelEqual(channel, _channel)) {
         const nickname = message.split(' ')[1];
 
         if (!nickname) {
@@ -73,7 +75,7 @@ class MyBot {
           requestingUser
         );
       }
-      if (message === '!help') {
+      if (message === '!help' && isChannelEqual(channel, _channel)) {
         client.say(
           _channel,
           toPrivate(
@@ -127,34 +129,14 @@ class MyBot {
     return new Date().toLocaleTimeString('ua-UA', { hour12: false });
   }
 
+  isChannelEqual(channelFromListener, defaultChannel) {
+    const sharped = `#${defaultChannel}`;
+    return sharped === channelFromListener;
+  }
+
   pmTag(tag, text) {
     return `@${tag}: ${text}`;
   }
-
-  // monitorChat(channel, tags, message) {
-  //   if (settings.watchedUsers.includes(tags.username)) {
-  //     fs.appendFile(
-  //       this.logFilePathHandler(channel),
-  //       `<${this.currentTime()}>[channel:${channel}] ${
-  //         tags.username
-  //       }: ${message}\n`,
-  //       (err) => {
-  //         if (err) {
-  //           process.stdout.write(
-  //             this.colorize('lightRed', err)
-  //           );
-  //           process.exit(0);
-  //         }
-  //       }
-  //     );
-  //     process.stdout.write(
-  //       this.colorize(
-  //         'blue',
-  //         `Captured ${tags.username}'s message [channel:${channel}].\n`
-  //       )
-  //     );
-  //   }
-  // }
 
   logChat(channel, tags, message) {
     const timestamp = this.currentTime();

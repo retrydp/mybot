@@ -1,24 +1,6 @@
 {
   "targetChannels": ["retrydp", "k0smos95", "kykla66", "chakralounge"],
-  "watchedUsers": [
-    "byme69",
-    "blackgeneralgenagenerator",
-    "latatatum",
-    "molomus",
-    "mr_bonger",
-    "alpaca_m",
-    "olkikz",
-    "chakralounge",
-    "mrtwentytwo",
-    "k0smos95",
-    "kykla66",
-    "logika17",
-    "izanami_dav",
-    "goblak333",
-    "sportmafia",
-    "dysheboy",
-    "yachmen2424",
-    "eugene_locky"
-  ],
-  "permittedUsers": ["retrydp", "k0smos95"]
+  "permittedUsers": ["retrydp", "k0smos95"],
+  "twitchUsername": "",
+  "twitchToken": ""
 }

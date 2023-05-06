@@ -15,12 +15,10 @@ class BattlegroundStatsParser {
   async init() {
     const lw = new LW();
     const { colorize, logToConsole } = this.tf;
+    const fetchData = this.fetchLeaderboardData.bind(this);
     const log = this.measureExecutionTime.bind(this);
     logToConsole(colorize(`blue`, `Initializing...`));
-    const data = await log(
-      colorize(`blue`, `Parsed in`),
-      this.fetchLeaderboardData()
-    );
+    const data = await log(colorize(`blue`, `Parsed in`), fetchData());
     await log(colorize(`blue`, `Saved to file in`), lw.logToFile(data));
   }
 

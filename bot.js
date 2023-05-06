@@ -167,8 +167,9 @@ readSettings()
     process.exit(1);
   });
 
-/* TODO:
+/* 
+  TODO:
     - readSettings into particular class
     - provide settings into main module like context
     - add "connectionsToApiNumber" in settings
-  */
+*/

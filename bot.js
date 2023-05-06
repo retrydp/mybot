@@ -41,8 +41,8 @@ class MyBot {
       if (self) return;
       if (
         message === '!refresh' &&
-        settings.permittedUsers.includes(userstate.username) &&
-        userstate.mod &&
+        (settings.permittedUsers.includes(userstate.username) ||
+          userstate.mod) &&
         isChannelEqual(channel, _channel)
       ) {
         const refresher = new Refresher();
@@ -120,10 +120,6 @@ class MyBot {
         );
       });
   };
-
-  logFilePathHandler(channelName) {
-    return `./logs/${channelName.substring(1)}.txt`;
-  }
 
   currentTime() {
     return new Date().toLocaleTimeString('ua-UA', { hour12: false });

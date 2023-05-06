@@ -1,4 +1,5 @@
-const tmi = require('tmi.js');const env = require('dotenv');
+const tmi = require('tmi.js');
+const env = require('dotenv');
 const settings = require('./settings.json');
 const fs = require('fs/promises');
 const Refresher = require('./utils/battlegroundStatsParser');
@@ -153,13 +154,15 @@ async function readSettings() {
   const opts = JSON.parse(settings.toString());
   return opts;
 }
+
 readSettings()
   .then((data) => {
-    const login = data.twitchUsername;
-    const token = data.twitchToken;
+    const login = data.twitchUsername || process.env.TWITCH_USERNAME;
+    const token = data.twitchToken || process.env.TWITCH_TOKEN;
     new MyBot(login, token);
   })
   .catch((err) => {
-    console.log(err);
+    const { colorize, logToConsole } = new TerminalFormatter();
+    logToConsole(colorize(`red`, err));
     process.exit(1);
   });

@@ -12,10 +12,9 @@ class MyBot {
   tf = new TerminalFormatter();
 
   constructor(username, password) {
-    const _channel = `#${this.defaultChannel}`;
-    const toPrivate = this.pmTag;
-    const { colorize, logToConsole } = this.tf;
-    const isChannelEqual = this.isChannelEqual;
+    const { pmTag: toPrivate, isChannelEqual, tf, defaultChannel } = this;
+    const _channel = `#${defaultChannel}`;
+    const { colorize, logToConsole } = tf;
     const client = new tmi.Client({
       options: { debug: false },
       identity: {
@@ -92,8 +91,8 @@ class MyBot {
   searchUserInDatabaseAndSendResult = (ctx, user, requestingUser) => {
     fs.readFile('./data/db.json')
       .then((data) => {
-        const toPrivate = this.pmTag;
-        const _channel = this.defaultChannel;
+        const { pmTag: toPrivate, defaultChannel } = this;
+        const _channel = `#${defaultChannel}`;
         const db = JSON.parse(data);
         const result = db.find(
           (el) => el.accountid.toLowerCase() === user.toLowerCase()

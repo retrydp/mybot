@@ -35,9 +35,7 @@ class MyBot {
         logToConsole(colorize('red', err));
         process.exit(0);
       });
-
     const context = { client, _channel, permittedUsers, defaultChannel };
-
     modules.forEach((module) => {
       if (!Object.keys(modulesList).includes(module))
         throw new Error(`Module "${module}" not found.`);
@@ -59,8 +57,9 @@ async function readSettings() {
   return opts;
 }
 
-readSettings()
-  .then((data) => {
+async function startBot() {
+  try {
+    const data = await readSettings();
     const {
       twitchUsername: username,
       twitchToken: password,
@@ -78,12 +77,14 @@ readSettings()
     };
 
     new MyBot(ctx);
-  })
-  .catch((err) => {
+  } catch (err) {
     const { colorize, logToConsole } = new TerminalFormatter();
-    logToConsole(colorize(`red`, err));
+    logToConsole(colorize('red', err));
     process.exit(1);
-  });
+  }
+}
+
+startBot();
 
 process.on('unhandledRejection', console.error); //TODO: log this error
 

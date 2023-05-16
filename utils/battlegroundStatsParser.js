@@ -1,6 +1,6 @@
 const https = require('https');
 const { Agent } = require('https');
-const LW = require('../controllers/logWriter.js');
+const LW = require('./logWriter.js');
 const TerminalFormatter = require('./terminalFormatter');
 
 class BattlegroundStatsParser {

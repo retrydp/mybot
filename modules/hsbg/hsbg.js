@@ -99,7 +99,9 @@ class Hsbg {
       })
       .catch((err) => {
         const { logToConsole, colorize } = this.tf;
+
         logToConsole(colorize('red', err));
+
         ctx.say(
           this.defaultChannel,
           'Помилка при завантаженні таблиці! Мабуть ви не обновили стату. (!refresh)'

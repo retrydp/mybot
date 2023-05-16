@@ -10,6 +10,7 @@ class BattlegroundStatsParser {
 
   constructor() {
     const { logToConsole, colorize } = this.tf;
+
     logToConsole(colorize(`blue`, `Fetcher executed`));
   }
 
@@ -34,7 +35,6 @@ class BattlegroundStatsParser {
   async fetchLeaderboardData() {
     const cached = [];
     const agent = new Agent({ maxSockets: this.PAGES }); // Set maximum number of concurrent connections
-
     const requests = Array.from({ length: this.PAGES }, (_, i) => {
       const url = this.createBlizzardAPIUrl(i + 1); // Use 1-based index
       const options = new URL(url);

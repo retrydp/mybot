@@ -36,6 +36,7 @@ class MyBot {
         process.exit(0);
       });
     const context = { client, _channel, permittedUsers, defaultChannel };
+
     modules.forEach((module) => {
       if (!Object.keys(modulesList).includes(module))
         throw new Error(`Module "${module}" not found.`);
@@ -79,6 +80,7 @@ async function startBot() {
     new MyBot(ctx);
   } catch (err) {
     const { colorize, logToConsole } = new TerminalFormatter();
+
     logToConsole(colorize('red', err));
     process.exit(1);
   }

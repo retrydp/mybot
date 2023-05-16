@@ -25,6 +25,7 @@ class MyBot {
       },
       channels: targetChannels,
     });
+
     client
       .connect()
       .then(() => {
@@ -34,10 +35,13 @@ class MyBot {
         logToConsole(colorize('red', err));
         process.exit(0);
       });
+
     const context = { client, _channel, permittedUsers, defaultChannel };
+
     modules.forEach((module) => {
       if (!Object.keys(modulesList).includes(module))
         throw new Error(`Module "${module}" not found.`);
+
       new modulesList[module](context);
     });
   }
@@ -45,16 +49,19 @@ class MyBot {
 
 async function readSettings() {
   const settings = await fs.readFile('./settings.json');
+
   if (!settings) {
     throw new Error('Unable to read/parse settings.json');
   }
+
   const opts = JSON.parse(settings.toString());
+
   return opts;
 }
 
 readSettings()
   .then((data) => {
-    let {
+    const {
       twitchUsername: username,
       twitchToken: password,
       modules,
@@ -78,11 +85,10 @@ readSettings()
     process.exit(1);
   });
 
-process.on('unhandledRejection', console.log);
+process.on('unhandledRejection', console.error); //TODO: log this error
 
 /* 
   TODO:
     - readSettings into particular class
-    - provide settings into main module like context
     - add "connectionsToApiNumber" in settings
 */

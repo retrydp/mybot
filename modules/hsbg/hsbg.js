@@ -15,13 +15,16 @@ class Hsbg {
     client.on('message', (...args) => {
       const [channel, userstate, message, self] = args;
       const requestingUser = userstate['display-name'];
+
       if (self) return;
+
       if (
         message === '!refresh' &&
         (permittedUsers.includes(userstate.username) || userstate.mod) &&
         isChannelEqual(channel, _channel)
       ) {
         const refresher = new Refresher();
+
         refresher
           .init()
           .then(() =>
@@ -35,8 +38,10 @@ class Hsbg {
             );
           });
       }
+
       if (message.startsWith('!bgrank') && isChannelEqual(channel, _channel)) {
         const nickname = message.split(' ')[1];
+
         if (!nickname) {
           client.say(
             channel,
@@ -44,12 +49,14 @@ class Hsbg {
           );
           return;
         }
+
         this.searchUserInDatabaseAndSendResult(
           client,
           nickname,
           requestingUser
         );
       }
+
       if (message === '!help' && isChannelEqual(channel, _channel)) {
         client
           .say(
@@ -61,6 +68,7 @@ class Hsbg {
           )
           .catch(console.log);
       }
+
       this.logChat(...args);
     });
   }
@@ -82,6 +90,7 @@ class Hsbg {
           );
           return;
         }
+
         const statsMessage = toPrivate(
           requestingUser,
           `Гравець ${result.accountid} зараз на ${result.rank} з рейтингом ${result.rating}`

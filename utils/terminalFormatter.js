@@ -17,9 +17,11 @@ class TerminalFormatter {
     lightMagenta: 95,
     lightCyan: 96,
   };
+
   colorize = (color, output) => {
     return `\x1b[${this.terminalColors[color]}m${output}\x1b[0m`;
   };
+
   logToConsole(text) {
     process.stdout.write(text + '\n');
   }

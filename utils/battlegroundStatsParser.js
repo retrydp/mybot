@@ -7,6 +7,7 @@ class BattlegroundStatsParser {
   PAGES = 10000 / 25; // 25 pages per chunk
   BLIZZ_API_URL = `https://hearthstone.blizzard.com/en-us/api/community/leaderboardsData?region=EU&leaderboardId=battlegrounds&page=`;
   tf = new TerminalFormatter();
+
   constructor() {
     const { logToConsole, colorize } = this.tf;
     logToConsole(colorize(`blue`, `Fetcher executed`));
@@ -32,7 +33,6 @@ class BattlegroundStatsParser {
 
   async fetchLeaderboardData() {
     const cached = [];
-
     const agent = new Agent({ maxSockets: this.PAGES }); // Set maximum number of concurrent connections
 
     const requests = Array.from({ length: this.PAGES }, (_, i) => {
@@ -44,6 +44,7 @@ class BattlegroundStatsParser {
       return new Promise((resolve, reject) => {
         const req = https.get(options, (res) => {
           const chunks = [];
+
           res.on('data', (chunk) => chunks.push(chunk));
           res.on('end', () => resolve(JSON.parse(Buffer.concat(chunks))));
         });
@@ -70,6 +71,7 @@ class BattlegroundStatsParser {
   measureExecutionTime(text, cb) {
     const startTime = this.getCurrentTime();
     const { logToConsole } = this.tf;
+
     return cb.then((data) => {
       logToConsole(`${text} ${this.getCurrentTime() - startTime}ms`);
       return data;
